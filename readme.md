@@ -4,7 +4,8 @@
 sudo pacman -S flameshot
 sudo pacman -S feh
 sudo pacman -S xorg-xsetroot
-
+sudo pacman -S sysstat iproute2
+sudo pacman -S rofi firefox 
 
 ```
 
