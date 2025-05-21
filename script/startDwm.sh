@@ -1,12 +1,15 @@
 #!/bin/sh
 
-# переключени языка
-# sudo pacman -S xorg-xkbcomp xorg-setxkbmap
+# Настройки
 setxkbmap -layout us,ru -option grp:win_space_toggle
 feh --bg-fill ~/dwm/wallpaper/wallpaper1.jpg
 
-dwmblocks &
+# Запускаем статусбар
+~/dwm/script/bar.sh &
 
+# Запускаем DWM и перезапускаем при падении
 while true; do
-        dwm 2> ~/.dwm.log
+    # Ждем завершения dwm перед перезапуском
+    dwm 2> ~/.dwm.log
+    sleep 1
 done
