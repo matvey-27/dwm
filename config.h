@@ -55,10 +55,20 @@ static const Layout layouts[] = {
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
+#include <X11/XF86keysym.h>
+#define XF86XK_AudioLowerVolume	0x1008FF11   /* Volume control down        */
+#define XF86XK_AudioMute	0x1008FF12   /* Mute sound from the system */
+#define XF86XK_AudioRaiseVolume	0x1008FF13   /* Volume control up          */
+#define XF86XK_MonBrightnessUp   0x1008FF02  /* Monitor/panel brightness */
+#define XF86XK_MonBrightnessDown 0x1008FF03  /* Monitor/panel brightness */
+
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
 static const char *termcmd[]  = { "kitty", NULL };
+static const char *brupcmd[] = { "light", "-A", "10", NULL };
+static const char *brdowncmd[] = { "light", "-U", "10", NULL };
+static const char *flameshot[] = { "flameshot", "gui", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -95,6 +105,14 @@ static const Key keys[] = {
 	TAGKEYS(                        XK_8,                      7)
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
+
+
+	{ 0,                            XF86XK_AudioMute,     spawn,                 SHCMD("pactl set-sink-mute 0 toggle && dunstvol") },
+	{ 0,                            XF86XK_AudioLowerVolume,     spawn,          SHCMD("pactl set-sink-volume 0 -3% && dunstvol") },
+	{ 0,                            XF86XK_AudioRaiseVolume,     spawn,          SHCMD("pactl set-sink-volume 0 +3% && dunstvol") },
+	{ 0,                            XF86XK_MonBrightnessUp,    spawn,          {.v = brupcmd} },
+	{ 0,                            XF86XK_MonBrightnessDown,    spawn,          {.v = brdowncmd} },
+    { 0,                            XK_Print,  spawn,          {.v = flameshot} },
 };
 
 /* button definitions */
