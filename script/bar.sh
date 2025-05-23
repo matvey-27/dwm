@@ -1,93 +1,61 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-# ====================
-# КОНФИГУРАЦИЯ
-# ====================
+# Интервал обновления в секундах (0.5 = 500мс)
+UPDATE_INTERVAL=0.5
 
-# Символы Unicode (работают в большинстве терминалов)
-ICON_BATTERY="♡"       # Сердечко вместо батареи
-ICON_CHARGING="⚡"      # Молния для зарядки
-ICON_KEYBOARD="⌨"      # Символ клавиатуры
-ICON_NETWORK="↯"       # Молния для сети
-ICON_CPU="⌂"           # Дом для процессора
-ICON_MEM="Σ"           # Сумма для памяти
-ICON_CALENDAR="📅"     # Календарь (оставляем как есть)
-ICON_CLOCK="🕒"        # Часы (оставляем как есть)
-ICON_SEPARATOR="|"     # Разделитель
-
-# Путь к батарее
-BATTERY="BAT0"
-
-# ====================
-# ОСНОВНОЙ КОД (без изменений)
-# ====================
-
-has_battery() {
-    [ -d "/sys/class/power_supply/$BATTERY" ]
-}
-
-get_battery_status() {
-    local status=$(cat "/sys/class/power_supply/$BATTERY/status")
-    local charge=$(cat "/sys/class/power_supply/$BATTERY/capacity")
-    
-    if [ "$status" = "Charging" ]; then
-        echo "$ICON_CHARGING $charge%"
+status() {
+    # Получаем информацию о батарее
+    bat_info=$(acpi -b 2>/dev/null)
+    if [ $? -eq 0 ]; then
+        bat=$(echo "$bat_info" | awk '{print $4}' | sed 's/,//g; s/%//g')
+        bat_status=$(echo "$bat_info" | awk '{print $3}' | sed 's/,//g')
+        case "$bat_status" in
+            Charging) bat="CHG $bat%" ;;
+            Discharging) bat="BAT $bat%" ;;
+            *) bat="AC $bat%" ;;
+        esac
     else
-        echo "$ICON_BATTERY $charge%"
+        bat="PWR N/A"
     fi
-}
 
-get_datetime() {
-    echo "$ICON_CALENDAR $(date +'%a %d %b') $ICON_CLOCK $(date +'%I:%M %p')"
-}
-
-get_keyboard_layout() {
-    local layout=$(setxkbmap -query | grep layout | awk '{print $2}')
+    # Определение раскладки клавиатуры (более надежный способ)
+    layout=$(xset -q | grep -A 0 'LED mask' | awk '{print $NF}')
     case "$layout" in
-        "us") echo "$ICON_KEYBOARD EN" ;;
-        "ru") echo "$ICON_KEYBOARD RU" ;;
-        *) echo "$ICON_KEYBOARD $layout" ;;
+        00000000) layout="EN" ;;
+        00001000) layout="RU" ;;
+        *) layout=$(setxkbmap -query 2>/dev/null | grep layout | awk '{print $2}' | cut -c-2) || layout="??" ;;
     esac
-}
 
-get_network_status() {
-    local interface=$(ip route | grep default | awk '{print $5}' | head -n1)
-    if [ -z "$interface" ]; then
-        echo "$ICON_NETWORK DOWN"
-        return
+    # Получаем уровень громкости (универсальный способ)
+    volume=""
+    if command -v amixer >/dev/null; then
+        volume=$(amixer get Master 2>/dev/null | grep -o "[0-9]*%" | head -n 1 | tr -d '%')
+    elif command -v pactl >/dev/null; then
+        volume=$(pactl list sinks 2>/dev/null | grep '^[[:space:]]Volume:' | head -n 1 | awk '{print $5}' | tr -d '%')
     fi
     
-    local ssid=$(iwgetid -r)
-    if [ -n "$ssid" ]; then
-        local signal=$(awk '/wl/ {print $3}' /proc/net/wireless | cut -d. -f1)
-        echo "$ICON_NETWORK $ssid (${signal}%)"
+    if [ -n "$volume" ]; then
+        if [ "$volume" -gt 70 ]; then
+            volume="VOL+ $volume%"
+        elif [ "$volume" -gt 30 ]; then
+            volume="VOL $volume%"
+        elif [ "$volume" -gt 0 ]; then
+            volume="VOL- $volume%"
+        else
+            volume="MUTE"
+        fi
     else
-        local speed=$(cat /sys/class/net/$interface/speed 2>/dev/null)
-        [ -n "$speed" ] && speed="${speed}Mb/s" || speed="ETH"
-        echo "$ICON_NETWORK $speed"
+        volume="VOL N/A"
     fi
+
+    # Форматирование даты и времени с секундами
+    datetime=$(date '+%a %d.%m %H:%M:%S')
+
+    # Собираем все компоненты
+    echo -n "[ $layout ] [ $volume ] [ $bat ] [ $datetime ]"
 }
 
-get_system_load() {
-    local cpu_load=$(mpstat 1 1 | awk '/Average:/ {printf "%.0f", 100 - $12}')
-    local mem_used=$(free -m | awk '/Mem:/ {printf "%.1f", $3/$2 * 100}')
-    echo "$ICON_CPU ${cpu_load}% $ICON_MEM ${mem_used}%"
-}
-
-while true; do
-    components=(
-        "$(get_keyboard_layout)"
-        "$(get_network_status)"
-        "$(get_system_load)"
-    )
-    
-    if has_battery; then
-        components+=("$(get_battery_status)")
-    fi
-    
-    components+=("$(get_datetime)")
-    
-    status_bar=$(printf " %s " "${components[*]}")
-    xsetroot -name "$status_bar"
-    sleep 30
+while :; do
+    xsetroot -name "$(status)"
+    sleep $UPDATE_INTERVAL
 done
