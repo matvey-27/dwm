@@ -2,6 +2,8 @@ wallpaper/
 patches/
 config.h.dev
 config.h.dev.orig
+config.def.h
+config.def.h.orig
 dwm.c.orig
 dwm.o
 dwm
