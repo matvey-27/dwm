@@ -1,0 +1,11 @@
+wallpaper/
+patches/
+config.h.dev
+config.h.dev.orig
+dwm.c.orig
+dwm.o
+dwm
+drw.o
+util.o
+
+!wallpaper/wallpaper32.jpg

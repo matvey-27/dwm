@@ -2,7 +2,7 @@
 
 # Настройки
 setxkbmap -layout us,ru -option grp:win_space_toggle
-feh --bg-fill ~/dwm/wallpaper/wallpaper1.jpg
+feh --bg-fill ~/dwm/wallpaper/wallpaper32.jpg
 
 # Запускаем статусбар
 ~/dwm/script/bar.sh &
