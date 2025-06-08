@@ -13,11 +13,11 @@ static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const char *fonts[]          = { "monospace:size=12" };
 static const char dmenufont[]       = "monospace:size=10";
-static const char col_gray1[]       = "#222222";
-static const char col_gray2[]       = "#444444";
+static const char col_gray1[]       = "#124853";
+static const char col_gray2[]       = "#124853";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
-static const char col_cyan[]        = "#2F4F4F";
+static const char col_cyan[]        = "#24728d";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
@@ -71,7 +71,7 @@ static const char *flameshot[] = { "flameshot", "gui", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
-	{ MODKEY,						XK_p,	   spawn,          {.v = roficmd } },
+	{ MODKEY,			XK_r,	   spawn,          {.v = roficmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
@@ -111,7 +111,8 @@ static const Key keys[] = {
 	{ 0,                            XF86XK_AudioRaiseVolume,     spawn,          SHCMD("pactl set-sink-volume 0 +3% && dunstvol") },
 	{ 0,                            XF86XK_MonBrightnessUp,    spawn,          {.v = brupcmd} },
 	{ 0,                            XF86XK_MonBrightnessDown,    spawn,          {.v = brdowncmd} },
-    { 0,                            XK_Print,  spawn,          {.v = flameshot} },
+  	{ 0,                            XK_Print,  spawn,          {.v = flameshot} },
+
 };
 
 /* button definitions */
@@ -122,8 +123,7 @@ static const Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
 	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
-	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
-	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
+	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
 	{ ClkTagBar,            0,              Button1,        view,           {0} },
 	{ ClkTagBar,            0,              Button3,        toggleview,     {0} },
