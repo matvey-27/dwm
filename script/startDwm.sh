@@ -7,6 +7,9 @@ feh --bg-fill ~/dwm/wallpaper/wallpaper32.jpg
 # Запускаем статусбар
 ~/dwm/script/bar.sh &
 
+# Polkit agent
+lxqt-policykit-agent &
+
 picom --config ~/.config/picom.conf &
 
 # Запускаем DWM и перезапускаем при падении
